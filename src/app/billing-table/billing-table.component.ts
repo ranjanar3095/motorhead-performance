@@ -487,27 +487,6 @@ export class BillingTableComponent implements OnInit {
             ],
           ],
         },
-        // {
-        //   text: 'Additional Details',
-        //   style: 'sectionHeader',
-        // },
-        // {
-        //   columns: [
-        //     [{ qr: `${'Customer 1'}`, fit: '50' }],
-        //     [{ text: 'Signature', alignment: 'right', italics: true }],
-        //   ],
-        // },
-        // {
-        //   text: 'Terms and Conditions',
-        //   style: 'sectionHeader',
-        // },
-        // {
-        //   ul: [
-        //     'Order can be return in max 10 days.',
-        //     'Warrenty of the product will be subject to the manufacturer terms and conditions.',
-        //     'This is system generated invoice.',
-        //   ],
-        // },
       ],
       styles: {
         sectionHeader: {
