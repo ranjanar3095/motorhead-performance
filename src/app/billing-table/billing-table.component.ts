@@ -497,7 +497,6 @@ export class BillingTableComponent implements OnInit {
         },
       },
     };
-
     action === 'download'
       ? pdfMake.createPdf(docDefinition).download()
       : pdfMake.createPdf(docDefinition).open();
