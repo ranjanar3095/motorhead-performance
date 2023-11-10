@@ -9,6 +9,9 @@
     "test": "ng test"
   },
   "private": true,
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "dependencies": {
     "@angular/animations": "^16.2.0",
     "@angular/cdk": "^16.2.9",

@@ -33,7 +33,7 @@ jobs:
         with:
           node-version: 16.x
       - name: Installing NPM packages
-        run: npm install --registry=https://registry.npmjs.org/
+        run: npm install
       - name: Building project
         run: npm run build:prod
       - name: Setup Pages
