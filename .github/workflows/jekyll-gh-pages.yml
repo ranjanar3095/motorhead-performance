@@ -29,22 +29,22 @@ jobs:
         with:
           name: deploy_dist
           path: dist/motorhead-performance
-deploy:
-  runs-on: ubuntu-latest
-  needs: build
-  environment:
-    name: production
-    url: '${{ steps.deploy-to-webapp.outputs.webapp-url }}'
-  steps:
-    - name: Download artifact from build job
-      uses: actions/download-artifact@v2
-      with:
-        name: deploy_dist
-    - name: Deploy to Azure Web App
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: motorhead-performance
-  slot-name: production
-  publish-profile: '${{ secrets.ACCESS_TOKEN }}'
-  package: .
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: production
+      url: '${{ steps.deploy-to-webapp.outputs.webapp-url }}'
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v2
+        with:
+          name: deploy_dist
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: motorhead-performance
+    slot-name: production
+    publish-profile: '${{ secrets.ACCESS_TOKEN }}'
+    package: .
