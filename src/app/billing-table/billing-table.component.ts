@@ -43,7 +43,7 @@ export class BillingTableComponent implements OnInit {
     this.resetTable();
     this.subscriptions.add(
       this.http
-        .get('/assets/img/logo.svg', { responseType: 'text' })
+        .get('/motorhead-performance/assets/img/logo.svg', { responseType: 'text' })
         .subscribe((logo) => (this.logo = logo))
     );
   }
