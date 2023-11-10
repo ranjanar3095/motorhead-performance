@@ -17,6 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "allowedCommonJsDependencies": ["pdfmake", "to-words"],
             "outputPath": "dist/motorhead-performance",
             "index": "src/index.html",
             "main": "src/main.ts",
