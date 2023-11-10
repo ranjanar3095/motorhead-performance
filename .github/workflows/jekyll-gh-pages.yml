@@ -22,42 +22,40 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Build job
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Installing Node.js
+      - uses: actions/checkout@v2
+      - name: Set up Node.js version
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
-      - name: Installing NPM packages
-        run: npm install
-      - name: Building project
-        run: npm run build:prod
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./
-          destination: ./dist/motorhead-performance
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: ./dist/motorhead-performance
+      - name: npm install, build, and test
+        run: |
+          npm install
+          npm run build:prod
 
-  # Deployment job
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
-        with:
-          publish_dir: dist/motorhead-performance
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v2
+          with:
+        name: deploy_dist
+        path: dist/motorhead-performance
+deploy:
+      runs-on: ubuntu-latest
+      needs: build
+      environment:
+        name: 'production'
+        url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+      steps:
+        - name: Download artifact from build job
+          uses: actions/download-artifact@v2
+          with:
+            name: deploy_dist
+      - name: 'Deploy to Azure Web App'
+          id: deploy-to-webapp
+          uses: azure/webapps-deploy@v2
+          with:
+            app-name: 'motorhead-performance'
+      slot-name: 'production'
+      publish-profile: ${{ secrets.ACCESS_TOKEN }}
+      package: .
