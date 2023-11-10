@@ -45,6 +45,3 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: motorhead-performance
-    slot-name: production
-    publish-profile: '${{ secrets.ACCESS_TOKEN }}'
-    package: .
