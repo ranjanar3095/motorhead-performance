@@ -15,7 +15,8 @@ import { ToWords } from 'to-words';
 export class BillingTableComponent implements OnInit {
   billingTable!: FormGroup;
   control!: FormArray;
-  touchedRows: any;
+  touchedRows: any = [];
+  filteredSacRows: any = [];
   toWords = new ToWords({
     localeCode: 'en-IN',
     converterOptions: {
@@ -26,9 +27,11 @@ export class BillingTableComponent implements OnInit {
   });
 
   invoiceNumber: string = '';
+  date = new Date();
   customerName: string = '';
   customerContact: number | undefined = undefined;
   customerEmail: string = '';
+  customerGstn: string = '';
   bikeModel: string = '';
   lastKMReading: string = '';
   paymentMode: string = '';
@@ -39,7 +42,6 @@ export class BillingTableComponent implements OnInit {
   constructor(private fb: FormBuilder, private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.touchedRows = [];
     this.resetTable();
     this.subscriptions.add(
       this.http
@@ -60,6 +62,8 @@ export class BillingTableComponent implements OnInit {
     return this.fb.group({
       service: [''],
       sac: [''],
+      gstRate: [''],
+      partNumber: [''],
       quantity: [''],
       rate: [''],
       amount: [''],
@@ -83,6 +87,8 @@ export class BillingTableComponent implements OnInit {
     this.bikeModel = '';
     this.lastKMReading = '';
     this.paymentMode = '';
+    this.customerGstn = '';
+    this.date = new Date();
   }
 
   addRow(): void {
@@ -105,6 +111,19 @@ export class BillingTableComponent implements OnInit {
     this.touchedRows = control.controls
       .filter((row) => row.touched)
       .map((row) => row.value);
+    const sacRows = control.controls
+      .filter((row) => row.value.sac && row.value.sac !== '')
+      .map((row) => row.value);
+    const sacMap = new Map<string, number>();
+    sacRows.forEach((row) =>
+      sacMap.has(row.sac)
+        ? sacMap.set(row.sac, Number(sacMap?.get(row.sac)) + Number(row.amount))
+        : sacMap.set(row.sac, Number(row.amount))
+    );
+    this.filteredSacRows = [];
+    sacMap.forEach((value, key) => {
+      this.filteredSacRows.push({ sac: key, amount: value });
+    });
     this.generatePDF(action);
   }
 
@@ -112,10 +131,13 @@ export class BillingTableComponent implements OnInit {
     return Number((Number(amount) * 0.18).toFixed(2));
   }
 
-  calculateAmount(rate: any, quantity: any, i: any): void {
-    if (rate && quantity) {
+  calculateAmount(rate: any, quantity: any, gstRate: any, i: any): void {
+    if (rate && quantity && gstRate >= 0) {
       this.getFormControls.controls[i].patchValue({
-        amount: (Number(quantity) * Number(rate)).toFixed(2),
+        amount: (
+          Number(quantity) * Number(rate) +
+          (Number(quantity) * Number(rate) * Number(gstRate)) / 100
+        ).toFixed(2),
       });
     }
   }
@@ -124,6 +146,30 @@ export class BillingTableComponent implements OnInit {
     return this.touchedRows.reduce(
       (sum: number, current: { amount: string }) =>
         sum + Number(current.amount),
+      0
+    );
+  }
+
+  getSacTotalWithoutGST() {
+    return this.filteredSacRows.reduce(
+      (sum: number, current: { amount: string }) =>
+        sum + Number(current.amount),
+      0
+    );
+  }
+
+  getSacTotalWithGST() {
+    return this.filteredSacRows.reduce(
+      (sum: number, current: { amount: string }) =>
+        sum + Number(current.amount) * 0.18,
+      0
+    );
+  }
+
+  getStateAndCentralTaxtotal() {
+    return this.filteredSacRows.reduce(
+      (sum: number, current: { amount: string }) =>
+        sum + Number(current.amount) * 0.09,
       0
     );
   }
@@ -276,7 +322,7 @@ export class BillingTableComponent implements OnInit {
             ],
             [
               {
-                text: `${new Date().toLocaleString().split(',')[0]}`,
+                text: `${new Date(this.date).toLocaleString().split(',')[0]}`,
                 fontSize: 10,
                 margin: [-25, 15, 0, 0],
               },
@@ -353,6 +399,27 @@ export class BillingTableComponent implements OnInit {
                   ],
                 ],
               },
+              {
+                columns: [
+                  // Labels
+                  [
+                    {
+                      text: 'GSTN:   ',
+                      fontSize: 11,
+                      bold: true,
+                      margin: [0, 2, 0, 0],
+                    },
+                  ],
+                  // Values
+                  [
+                    {
+                      text: this.customerGstn,
+                      fontSize: 10,
+                      margin: [-90, 2, 0, 0],
+                    },
+                  ],
+                ],
+              },
             ],
             [
               {
@@ -409,10 +476,12 @@ export class BillingTableComponent implements OnInit {
         {
           table: {
             headerRows: 1,
-            widths: ['*', 100, 'auto', 75, 75],
+            widths: ['*', 100, 'auto', 100, 'auto', 75, 75],
             body: [
               [
                 { text: 'Service', fontSize: 10, bold: true },
+                { text: 'HSN/SAC', fontSize: 10, bold: true },
+                { text: 'GST Rate(%)', fontSize: 10, bold: true },
                 { text: 'Part Number', fontSize: 10, bold: true },
                 { text: 'Quantity', fontSize: 10, bold: true },
                 { text: 'Rate', fontSize: 10, bold: true },
@@ -421,34 +490,67 @@ export class BillingTableComponent implements OnInit {
               ...this.touchedRows.map((p: any) => [
                 { text: p.service, fontSize: 10 },
                 { text: p.sac, fontSize: 10 },
+                { text: '18%', fontSize: 10 },
+                { text: p.partNumber, fontSize: 10 },
                 { text: p.quantity, fontSize: 10 },
                 { text: p.rate, fontSize: 10 },
                 { text: p.amount, fontSize: 10 },
               ]),
               [
-                { text: 'Total', colSpan: 4, bold: true, fontSize: 10 },
+                { text: 'Total', colSpan: 6, bold: true, fontSize: 10 },
+                { text: '' },
+                { text: '' },
                 { text: '' },
                 { text: '' },
                 { text: '' },
                 {
-                  text: this.getTotal(),
+                  text: this.getTotal().toFixed(2),
                   fontSize: 10,
                   bold: true,
                 },
               ],
               [
-                { text: 'GST(18%)', colSpan: 4, bold: true, fontSize: 10 },
+                {
+                  text: 'OUTPUT CGST(9%)',
+                  colSpan: 6,
+                  fontSize: 10,
+                  alignment: 'right',
+                  italics: true,
+                },
+                { text: '' },
+                { text: '' },
                 { text: '' },
                 { text: '' },
                 { text: '' },
                 {
-                  text: (Number(this.getTotal()) * 0.18).toFixed(2),
+                  text: (Number(this.getTotal()) * 0.09).toFixed(2),
                   fontSize: 10,
                   bold: true,
                 },
               ],
               [
-                { text: 'Grand Total', colSpan: 4, bold: true, fontSize: 12 },
+                {
+                  text: 'OUTPUT SGST(9%)',
+                  colSpan: 6,
+                  fontSize: 10,
+                  alignment: 'right',
+                  italics: true,
+                },
+                { text: '' },
+                { text: '' },
+                { text: '' },
+                { text: '' },
+                { text: '' },
+                {
+                  text: (Number(this.getTotal()) * 0.09).toFixed(2),
+                  fontSize: 10,
+                  bold: true,
+                },
+              ],
+              [
+                { text: 'Grand Total', colSpan: 6, bold: true, fontSize: 12 },
+                { text: '' },
+                { text: '' },
                 { text: '' },
                 { text: '' },
                 { text: '' },
@@ -468,9 +570,9 @@ export class BillingTableComponent implements OnInit {
           columns: [
             [
               {
-                text: 'Amount in words: ',
+                text: 'Amount Chargeable (in words): ',
                 fontSize: 12,
-                margin: [0, 8, 0, 0],
+                margin: [0, 4, 0, 0],
                 bold: true,
               },
             ],
@@ -480,13 +582,119 @@ export class BillingTableComponent implements OnInit {
                   Number(this.getTotal()) + Number(this.getTotal()) * 0.18
                 ),
                 fontSize: 10,
-                margin: [-183, 10, 0, 0],
+                margin: [-115, 6, 0, 30],
                 wordWrap: 'break-word',
                 bold: true,
               },
             ],
           ],
         },
+        this.filteredSacRows.length > 0
+          ? {
+              table: {
+                headerRows: 2 /* should use 2*/,
+                widths: [100, '*', '*', '*', '*', '*', '*'],
+                body: [
+                  [
+                    { text: 'HSN/SAC', fontSize: 10, bold: true, rowSpan: 2 },
+                    {
+                      text: 'Taxable Value',
+                      fontSize: 10,
+                      bold: true,
+                      rowSpan: 2,
+                    },
+                    {
+                      text: 'Central Tax',
+                      fontSize: 10,
+                      bold: true,
+                      colSpan: 2,
+                    },
+                    { text: '' },
+                    { text: 'State Tax', fontSize: 10, bold: true, colSpan: 2 },
+                    { text: '' },
+                    {
+                      text: 'Total Tax Amount',
+                      fontSize: 10,
+                      bold: true,
+                      rowSpan: 2,
+                    },
+                  ],
+                  [
+                    {},
+                    {},
+                    { text: 'Rate', fontSize: 10, bold: true },
+                    { text: 'Amount', fontSize: 10, bold: true },
+                    { text: 'Rate', fontSize: 10, bold: true },
+                    { text: 'Amount', fontSize: 10, bold: true },
+                    {},
+                  ],
+                  ...this.filteredSacRows.map((p: any) => [
+                    { text: p.sac, fontSize: 10 },
+                    { text: p.amount, fontSize: 10 },
+                    { text: '9%', fontSize: 10 },
+                    { text: (p.amount * 0.09).toFixed(2), fontSize: 10 },
+                    { text: '9%', fontSize: 10 },
+                    { text: (p.amount * 0.09).toFixed(2), fontSize: 10 },
+                    { text: (p.amount * 0.18).toFixed(2), fontSize: 10 },
+                  ]),
+                  [
+                    { text: 'Total', bold: true, fontSize: 12 },
+                    {
+                      text: Number(this.getSacTotalWithoutGST()).toFixed(2),
+                      fontSize: 10,
+                      bold: true,
+                    },
+                    { text: '' },
+                    {
+                      text: Number(this.getStateAndCentralTaxtotal()).toFixed(
+                        2
+                      ),
+                      fontSize: 10,
+                      bold: true,
+                    },
+                    { text: '' },
+                    {
+                      text: Number(this.getStateAndCentralTaxtotal()).toFixed(
+                        2
+                      ),
+                      fontSize: 10,
+                      bold: true,
+                    },
+                    {
+                      text: Number(this.getSacTotalWithGST()).toFixed(2),
+                      fontSize: 10,
+                      bold: true,
+                    },
+                  ],
+                ],
+              },
+            }
+          : {},
+        this.filteredSacRows.length > 0
+          ? {
+              columns: [
+                [
+                  {
+                    text: 'Tax Amount (in words): ',
+                    fontSize: 12,
+                    margin: [0, 4, 0, 0],
+                    bold: true,
+                  },
+                ],
+                [
+                  {
+                    text: this.toWords.convert(
+                      Number(this.getTotal()) + Number(this.getTotal()) * 0.18
+                    ),
+                    fontSize: 10,
+                    margin: [-155, 6, 0, 0],
+                    wordWrap: 'break-word',
+                    bold: true,
+                  },
+                ],
+              ],
+            }
+          : {},
       ],
       styles: {
         sectionHeader: {
@@ -498,7 +706,13 @@ export class BillingTableComponent implements OnInit {
       },
     };
     action === 'download'
-      ? pdfMake.createPdf(docDefinition).download()
+      ? pdfMake
+          .createPdf(docDefinition)
+          .download(
+            `${this.bikeModel}_${
+              new Date(this.date).toLocaleString().split(',')[0]
+            }`
+          )
       : pdfMake.createPdf(docDefinition).open();
   }
 }
