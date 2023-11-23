@@ -45,7 +45,9 @@ export class BillingTableComponent implements OnInit {
     this.resetTable();
     this.subscriptions.add(
       this.http
-        .get('/motorhead-performance/assets/img/logo.svg', { responseType: 'text' })
+        .get('/motorhead-performance/assets/img/logo.svg', {
+          responseType: 'text',
+        })
         .subscribe((logo) => (this.logo = logo))
     );
   }
@@ -684,7 +686,7 @@ export class BillingTableComponent implements OnInit {
                 [
                   {
                     text: this.toWords.convert(
-                      Number(this.getTotal()) + Number(this.getTotal()) * 0.18
+                      Number(this.getSacTotalWithGST())
                     ),
                     fontSize: 10,
                     margin: [-155, 6, 0, 0],
@@ -709,8 +711,8 @@ export class BillingTableComponent implements OnInit {
       ? pdfMake
           .createPdf(docDefinition)
           .download(
-            `${this.bikeModel}_${
-              new Date(this.date).toLocaleString().split(',')[0]
+            `${new Date(this.date).toLocaleString().split(',')[0]}_${
+              this.bikeModel
             }`
           )
       : pdfMake.createPdf(docDefinition).open();
