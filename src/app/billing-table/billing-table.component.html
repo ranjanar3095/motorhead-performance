@@ -110,12 +110,13 @@
                 <button mat-raised-button type="submit" (click)="addRow()">Add row</button>
             </div>
             <div class="col-md-7">
-                <button mat-raised-button type="submit" (click)="submitForm('preview')">Invoice
-                    Preview</button>
-                <button mat-raised-button type="submit" (click)="submitForm('download')">Download
-                    Invoice</button>
                 <button mat-raised-button type="submit" (click)="resetForm()">Generate New
                     Invoice</button>
+                <button mat-raised-button type="submit" (click)="submitForm('download')">Download
+                    Invoice</button>
+                <button mat-raised-button type="submit" (click)="submitForm('preview')">Invoice
+                    Preview</button>
+
             </div>
         </div>
     </form>
