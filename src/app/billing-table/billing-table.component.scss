@@ -2,6 +2,10 @@ mat-icon {
   cursor: pointer;
 }
 
+.container {
+  margin: 0 0 0 15px;
+}
+
 .action-container {
   display: flex;
   padding: 10px;
@@ -52,7 +56,7 @@ input {
 
 .styled-table {
   border-collapse: collapse;
-  margin: 25px 0 0 -20px;
+  margin: 25px 0 0 8px;
   font-size: 0.9em;
   font-family: sans-serif;
   min-width: 100px;
@@ -95,5 +99,5 @@ h2 {
 }
 
 .invoice-margin {
-  margin: 15px 0 0 10px;
+  margin: 15px -80px 0 10px;
 }

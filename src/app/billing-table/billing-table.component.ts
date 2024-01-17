@@ -35,6 +35,7 @@ export class BillingTableComponent implements OnInit {
   bikeModel: string = '';
   lastKMReading: string = '';
   paymentMode: string = '';
+  regNo: string = '';
 
   private logo: string = '';
   private subscriptions: Subscription = new Subscription();
@@ -45,7 +46,7 @@ export class BillingTableComponent implements OnInit {
     this.resetTable();
     this.subscriptions.add(
       this.http
-        .get('/motorhead-performance/assets/img/logo.svg', {
+        .get('/assets/img/logo.svg', {
           responseType: 'text',
         })
         .subscribe((logo) => (this.logo = logo))
@@ -464,6 +465,25 @@ export class BillingTableComponent implements OnInit {
                       text: this.lastKMReading,
                       fontSize: 10,
                       margin: [-65, 2, 0, 0],
+                    },
+                  ],
+                ],
+              },
+              {
+                columns: [
+                  [
+                    {
+                      text: 'Registeration No:',
+                      fontSize: 11,
+                      bold: true,
+                      margin: [0, 2, 0, 0],
+                    },
+                  ],
+                  [
+                    {
+                      text: this.regNo,
+                      fontSize: 10,
+                      margin: [-50, 2, 0, 0],
                     },
                   ],
                 ],

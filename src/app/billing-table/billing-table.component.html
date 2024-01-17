@@ -54,7 +54,10 @@
             <input type="text" id="lastKMReading" name="lastKMReading" [(ngModel)]="lastKMReading"
                 placeholder="Kilometers">
         </div>
-        <div class="col-sm"></div>
+        <div class="col-sm">
+            <label for="regNo">Registeration No.</label>
+            <input type="text" id="regNo" name="regNo" [(ngModel)]="regNo" placeholder="Registeration Number">
+        </div>
     </div>
     <h2 class="header-margin"> Service Details: </h2>
     <form [formGroup]="billingTable">
@@ -106,10 +109,11 @@
             </tbody>
         </table>
         <div class="row invoice-margin">
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <button mat-raised-button type="submit" (click)="addRow()">Add row</button>
             </div>
-            <div class="col-md-7">
+            <div class="col-md-1"></div>
+            <div class="col-md-7" style="padding-left: 130px;">
                 <button mat-raised-button type="submit" (click)="resetForm()">Generate New
                     Invoice</button>
                 <button mat-raised-button type="submit" (click)="submitForm('download')">Download
