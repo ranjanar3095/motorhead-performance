@@ -14,9 +14,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BillingTableComponent } from './billing-table/billing-table.component';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { HttpClientModule } from '@angular/common/http';
+import { NoGstBillingTableComponent } from './no-gst-billing-table/no-gst-billing-table.component';
 
 @NgModule({
-  declarations: [AppComponent, HeaderComponent, BillingTableComponent],
+  declarations: [AppComponent, HeaderComponent, BillingTableComponent, NoGstBillingTableComponent],
   imports: [
     AppRoutingModule,
     BrowserModule,

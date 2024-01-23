@@ -1,0 +1,109 @@
+<!---------- Table data ------------>
+<div class="container">
+    <div class="row">
+        <div class="col-sm">
+            <label for="invoiceNumber">Invoice Number</label>
+            <input type="text" id="invoiceNumber" name="invoiceNumber" [(ngModel)]="invoiceNumber"
+                placeholder="Invoice Number">
+        </div>
+        <div class="col-sm">
+            <label for="paymentMode">Payment Mode</label>
+            <input type="text" id="paymentMode" name="paymentMode" [(ngModel)]="paymentMode" placeholder="Payment Mode">
+        </div>
+        <div class="col-sm">
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" [(ngModel)]="date" placeholder="DD/MM/YYYY">
+        </div>
+    </div>
+    <h2> Customer Details: </h2>
+    <div class="row">
+        <div class="col-sm">
+            <label for="customerName">Name </label>
+            <input type="text" id="customerName" name="customerName" [(ngModel)]="customerName"
+                placeholder="Customer Name">
+        </div>
+        <div class="col-sm">
+            <label for="customerContact">Contact </label>
+            <input type="number" id="customerContact" name="customerContact" [(ngModel)]="customerContact"
+                placeholder="Contact">
+        </div>
+        <div class="col-sm">
+            <label for="customerEmail">Email ID </label>
+            <input type="text" id="customerEmail" name="customerEmail" [(ngModel)]="customerEmail"
+                placeholder="Email ID">
+        </div>
+    </div>
+    <br />
+    <h2> Bike Details: </h2>
+    <div class="row">
+        <div class="col-sm">
+            <label for="bikeModel">Make/Model </label>
+            <input type="text" id="bikeModel" name="bikeModel" [(ngModel)]="bikeModel" placeholder="Make/Model">
+        </div>
+        <div class="col-sm">
+            <label for="lastKMReading">ODO Reading</label>
+            <input type="text" id="lastKMReading" name="lastKMReading" [(ngModel)]="lastKMReading"
+                placeholder="Kilometers">
+        </div>
+        <div class="col-sm">
+            <label for="regNo">Registeration No.</label>
+            <input type="text" id="regNo" name="regNo" [(ngModel)]="regNo" placeholder="Registeration Number">
+        </div>
+    </div>
+    <h2 class="header-margin"> Service Details: </h2>
+    <form [formGroup]="billingTable">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Part Number</th>
+                    <th>Quantity</th>
+                    <th>Rate</th>
+                    <th>Amount</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container formArrayName="tableRows" *ngFor="let group of getFormControls.controls ; let i=index">
+                    <tr *ngIf="group.get('isEditable')?.value" [formGroupName]="i">
+                        <td>
+                            <input type="text" formControlName="service">
+                        </td>
+                        <td>
+                            <input type="text" formControlName="partNumber">
+                        </td>
+                        <td>
+                            <input type="number" formControlName="quantity"
+                                (input)="calculateAmount(group.get('rate')?.value, group.get('quantity')?.value, group.get('gstRate')?.value, i)">
+                        </td>
+                        <td>
+                            <input type="number" formControlName="rate"
+                                (input)="calculateAmount(group.get('rate')?.value, group.get('quantity')?.value, group.get('gstRate')?.value, i)">
+                        </td>
+                        <td>
+                            <input type="text" formControlName="amount">
+                        </td>
+                        <td>
+                            <mat-icon class="delete" (click)="deleteRow(i)">delete_forever</mat-icon>
+                        </td>
+                    </tr>
+                </ng-container>
+            </tbody>
+        </table>
+        <div class="row invoice-margin">
+            <div class="col-md-4">
+                <button mat-raised-button type="submit" (click)="addRow()">Add row</button>
+            </div>
+            <div class="col-md-1"></div>
+            <div class="col-md-7" style="padding-left: 130px;">
+                <button mat-raised-button type="submit" (click)="resetForm()">Generate New
+                    Invoice</button>
+                <button mat-raised-button type="submit" (click)="submitForm('download')">Download
+                    Invoice</button>
+                <button mat-raised-button type="submit" (click)="submitForm('preview')">Invoice
+                    Preview</button>
+
+            </div>
+        </div>
+    </form>
+</div>
