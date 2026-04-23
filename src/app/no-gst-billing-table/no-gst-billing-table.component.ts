@@ -247,7 +247,7 @@ export class NoGstBillingTableComponent implements OnInit {
               alignment: 'center',
             },
             {
-              text: 'Phone: 6362 33 4646',
+              text: 'Phone: 9886 50 4340',
               fontSize: 9,
               bold: false,
               margin: [-1265, 5, 0, 0],
